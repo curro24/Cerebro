@@ -1,0 +1,9 @@
+{
+  "ollama_url": "http://localhost:11434",
+  "router_model": "qwen3:1.7b",
+  "coding_model": "qwen3:4b",
+  "general_model": "qwen3:4b",
+  "temperature_router": 0.0,
+  "temperature_specialists": 0.2,
+  "keep_alive": "0"
+}
