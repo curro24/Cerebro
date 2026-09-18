@@ -1,29 +1,37 @@
-# Cerebro V1 — Ollama + Python
+# Cerebro V2 — Ollama + Python + herramientas Windows
 
-V1 de una arquitectura de IA con 3 cerebros:
+Esta versión añade acceso CONTROLADO al sistema:
 
-1. `router`: analiza la petición y decide qué especialista usar.
-2. `coding`: especialista en programación.
-3. `general`: especialista para el resto.
+- Router: decide especialista y herramientas.
+- Coding: analiza/programa.
+- General: responde preguntas generales.
+- Filesystem: listar, leer y escribir archivos dentro de carpetas permitidas.
+- Terminal: ejecutar comandos, con confirmación para comandos no seguros.
+- Python: ejecutar scripts Python dentro de una carpeta de trabajo.
+- Auditoría: registra acciones en `logs/audit.jsonl`.
 
-La V1 usa la API local de Ollama directamente por HTTP, sin dependencias Python externas.
-El router devuelve una decisión estructurada en JSON.
+## Seguridad
+
+Por defecto solo se permite acceder a:
+
+`workspace/`
+
+Crea tus proyectos o copia un proyecto de prueba dentro de esa carpeta.
+
+La terminal bloquea comandos peligrosos y pide confirmación para comandos fuera de una lista segura.
+
+IMPORTANTE: esto NO es un sandbox de seguridad perfecto. No ejecutes la aplicación con privilegios de administrador y no le des acceso a carpetas sensibles.
 
 ## Requisitos
 
 - Windows 10/11
 - Python 3.10+
-- Ollama instalado y ejecutándose
-- Recomendado para tu RTX 4050 de 6 GB:
-  - `qwen3:1.7b` para router
-  - `qwen3:4b` para coding
-  - `qwen3:4b` para general
+- Ollama ejecutándose
+- Modelos:
+  - `qwen3:1.7b`
+  - `qwen3:4b`
 
-Puedes cambiar los modelos en `config.json`.
-
-## Instalación
-
-Abre CMD/PowerShell dentro de esta carpeta:
+Instalación:
 
 ```powershell
 ollama pull qwen3:1.7b
@@ -31,61 +39,67 @@ ollama pull qwen3:4b
 python main.py
 ```
 
-Si `qwen3:1.7b` no aparece en tu instalación, cambia `router_model` por un modelo pequeño que tengas disponible.
+## Comandos
 
-## Uso
+Dentro de Cerebro:
 
-```text
-Tú > escribe una pregunta
-```
+`/help`      ayuda
+`/tools`     herramientas disponibles
+`/models`    modelos
+`/exit`      salir
 
-Ejemplos:
-
-```text
-Tú > Explícame qué es una lista enlazada en Python
-Tú > Tengo este error: IndexError: list index out of range
-Tú > ¿Qué diferencia hay entre TCP y UDP?
-```
-
-Para salir:
+## Ejemplos
 
 ```text
-/exit
+Lista los archivos del proyecto.
+
+Lee main.py y dime qué hace.
+
+Busca errores en todo el proyecto.
+
+Crea un archivo llamado hola.py que imprima Hola Mundo.
+
+Ejecuta hola.py.
 ```
 
-Para ver modelos configurados:
-
-```text
-/models
-```
+Para una operación de escritura o ejecución, Cerebro puede pedirte confirmación.
 
 ## Arquitectura
 
 ```text
-                         USUARIO
-                            |
-                            v
-                     +--------------+
-                     |    ROUTER    |
-                     |  qwen3:1.7b  |
-                     +------+-------+
-                            |
-                 +----------+----------+
-                 |                     |
-             coding                  general
-            qwen3:4b                 qwen3:4b
-                 |                     |
-                 +----------+----------+
-                            |
-                            v
-                         RESPUESTA
+                     USUARIO
+                        |
+                        v
+                 +-------------+
+                 |    ROUTER   |
+                 +------+------+ 
+                        |
+          +-------------+-------------+
+          |             |             |
+          v             v             v
+       CODING        GENERAL        TOOLS
+          |             |             |
+          |             |       +-----+-----+
+          |             |       |     |     |
+          |             |       v     v     v
+          |             |    FILES  TERMINAL PYTHON
+          |             |       \     |     /
+          +-------------+--------\----+----/
+                                  |
+                                  v
+                              workspace/
+                                  |
+                                  v
+                               Windows
 ```
 
-La idea importante es que el router NO resuelve el problema. Solo decide qué cerebro debe hacerlo.
+## V3 recomendada
 
-## Próximas versiones
-
-V2: memoria persistente.
-V3: herramientas (Python, terminal, archivos).
-V4: crítico/verificador.
-V5: varios especialistas y ejecución de planes.
+- memoria persistente;
+- critic/verificador;
+- planificación multi-paso;
+- herramientas de búsqueda;
+- visión;
+- permisos configurables;
+- ejecución automática de tests;
+- selección dinámica entre modelos pequeños y grandes.

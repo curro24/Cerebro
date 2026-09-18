@@ -5,5 +5,9 @@
   "general_model": "qwen3:4b",
   "temperature_router": 0.0,
   "temperature_specialists": 0.2,
-  "keep_alive": "0"
+  "keep_alive": "0",
+  "workspace": "workspace",
+  "ask_confirmation_for_writes": true,
+  "ask_confirmation_for_terminal": true,
+  "max_output_chars": 20000
 }
